@@ -8,7 +8,7 @@
 modLoader="javafml" #mandatory
 
 # A version range to match for said mod loader - for regular FML @Mod it will be the forge version
-loaderVersion="[39,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
+loaderVersion="[41,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
 
 license="MIT"
 # A URL to refer people to when problems occur with this mod
@@ -37,7 +37,7 @@ displayURL="https://github.com/k-donn/CustomDebug" #optional
 logoFile="customdebug.png" #optional
 
 # A text field displayed in the mod UI
-credits="Inspiration from DannikInfo" #optional
+credits="Inspiration from DannikInfo and my friend for the idea" #optional
 
 # A text field displayed in the mod UI
 authors="k-donn, DannikInfo"
@@ -57,7 +57,7 @@ Shows information specific to each entity that can help you with breeding, moddi
     # Does this dependency have to exist - if not, ordering below must be specified
     mandatory=true #mandatory
     # The version range of the dependency
-    versionRange="[39,)" #mandatory
+    versionRange="[41,)" #mandatory
     # An ordering relationship for the dependency - BEFORE or AFTER required if the relationship is not mandatory
     ordering="NONE"
     # Side this dependency is applied on - BOTH, CLIENT or SERVER
@@ -68,6 +68,6 @@ Shows information specific to each entity that can help you with breeding, moddi
     modId="minecraft"
     mandatory=true
 # This version range declares a minimum of the current minecraft version up to but not including the next major version
-    versionRange="[1.18.1,1.19)"
+    versionRange="[1.19,1.20)"
     ordering="NONE"
     side="BOTH"

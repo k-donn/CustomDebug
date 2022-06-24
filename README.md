@@ -6,6 +6,6 @@ Shows information specific to each entity that can help you with breeding, moddi
 
 ## Meta
 
-Inspired by DannickInfo's [CustomDebug Minecraft](https://github.com/DannikInfo/CustomDebug-Minecraft-).
+Inspired by DannikInfo's [CustomDebug Minecraft](https://github.com/DannikInfo/CustomDebug-Minecraft-).
 
 I will add customizability later.

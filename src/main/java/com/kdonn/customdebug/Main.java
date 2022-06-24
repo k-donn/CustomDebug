@@ -1,5 +1,9 @@
 package com.kdonn.customdebug;
 
+import java.util.ArrayList;
+
+import org.slf4j.Logger;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -8,17 +12,26 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.RegistryEvent;
+
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.Material;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
@@ -55,57 +68,50 @@ import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.GameType;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.stream.Collectors;
+import com.mojang.logging.LogUtils;
 
 import com.mojang.datafixers.optics.Wander;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod("customdebug")
 public class Main {
-	// Directly reference a log4j logger.
-	private static final Logger LOGGER = LogManager.getLogger();
+	// Directly reference a slf4j logger
+	private static final Logger LOGGER = LogUtils.getLogger();
+
+	// Define mod id in a common place for everything to reference
+	public static final String MODID = "customdebug";
+
+	// Create a Deferred Register to hold Blocks which will all be registered under the "examplemod" namespace
+	public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
+
+	// Create a Deferred Register to hold Items which will all be registered under the "examplemod" namespace
+	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
 
 	public Main() {
-		// Register the setup method for modloading
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
-		// Register the enqueueIMC method for modloading
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::enqueueIMC);
-		// Register the processIMC method for modloading
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
+		IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+
+		// Register the commonSetup method for modloading
+		modEventBus.addListener(this::commonSetup);
 
 		// Register ourselves for server and other game events we are interested in
 		MinecraftForge.EVENT_BUS.register(this);
 	}
 
-	private void setup(final FMLCommonSetupEvent event) {
-		// some preinit code
+	private void commonSetup(final FMLCommonSetupEvent event) {
+		// Some common setup code
+		LOGGER.info("HELLO FROM COMMON SETUP");
+		LOGGER.info("DIRT BLOCK >> {}", ForgeRegistries.BLOCKS.getKey(Blocks.DIRT));
 	}
 
-	private void enqueueIMC(final InterModEnqueueEvent event) {
-		// some example code to dispatch IMC to another mod
-	}
 
-	private void processIMC(final InterModProcessEvent event) {
-		// some example code to receive and process InterModComms from other mods
-	}
-
-	// You can use SubscribeEvent and let the Event Bus discover methods to call
-	@SubscribeEvent
-	public void onServerStarting(ServerStartingEvent event) {
-		// do something when the server starts
-	}
-
-	// You can use EventBusSubscriber to automatically subscribe events on the
-	// contained class (this is subscribing to the MOD
-	// Event bus for receiving Registry Events)
-	@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
-	public static class RegistryEvents {
+	// You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
+	@Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
+	public static class ClientModEvents {
 		@SubscribeEvent
-		public static void onBlocksRegistry(final RegistryEvent.Register<Block> blockRegistryEvent) {
-			// register a new block here
-			LOGGER.info("HELLO from Register Block");
+		public static void onClientSetup(FMLClientSetupEvent event) {
+			// Some client setup code
+			LOGGER.info("HELLO FROM CLIENT SETUP");
+			LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
 		}
 	}
 
@@ -292,7 +298,7 @@ public class Main {
 
 							}
 						}
-					
+
 						if (pfMob instanceof WaterAnimal) {
 							WaterAnimal wAnimal = (WaterAnimal)pfMob;
 
@@ -308,14 +314,14 @@ public class Main {
 									right.add("max school size" + abSchoolingFish.getMaxSchoolSize());
 								}
 							}
-							
+
 							if (wAnimal instanceof Dolphin) {
 								Dolphin dolphin = (Dolphin) wAnimal;
 
 								right.add("moistness: " + dolphin.getMoistnessLevel());
 							}
 
-							
+
 						}
 					}
 				}
