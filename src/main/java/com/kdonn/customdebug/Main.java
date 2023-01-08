@@ -7,9 +7,12 @@ import org.slf4j.Logger;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.BeehiveBlock;
 import net.minecraft.world.level.block.Block;
 
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -20,7 +23,11 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -66,6 +73,7 @@ import net.minecraft.world.entity.monster.Strider;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameType;
 
 import com.mojang.logging.LogUtils;
@@ -118,12 +126,28 @@ public class Main {
 	@SubscribeEvent
 	public void renderOverlayEvent(RenderGameOverlayEvent.Text event) {
 		ArrayList<String> right = event.getRight();
-
+		
 		Minecraft mc = Minecraft.getInstance();
+		
+		LocalPlayer player = mc.player;
+		
+		HitResult hitResult = mc.hitResult;
+		
+		if (hitResult != null && hitResult.getType() != HitResult.Type.MISS) {
+			if (hitResult.getType() == HitResult.Type.BLOCK) {
+				BlockPos pos = ((BlockHitResult) hitResult).getBlockPos();
 
+				BlockEntity entity = player.level.getBlockEntity(pos);
+				
+				
+				if (entity instanceof BeehiveBlockEntity) {
+					
+				}
+			}
+		}
+	
 		if (mc.crosshairPickEntity != null) {
 			Entity entity = mc.crosshairPickEntity;
-			BlockPos pos = entity.blockPosition();
 
 			right.add("distance: " + (entity.distanceTo(mc.player)));
 
@@ -301,6 +325,12 @@ public class Main {
 
 						if (pfMob instanceof WaterAnimal) {
 							WaterAnimal wAnimal = (WaterAnimal)pfMob;
+							
+							if (wAnimal instanceof Dolphin) {
+								Dolphin dolphin = (Dolphin) wAnimal;
+
+								right.add("moistness: " + dolphin.getMoistnessLevel());
+							}
 
 							if (wAnimal instanceof AbstractFish) {
 								AbstractFish abFish = (AbstractFish)wAnimal;
@@ -314,13 +344,6 @@ public class Main {
 									right.add("max school size" + abSchoolingFish.getMaxSchoolSize());
 								}
 							}
-
-							if (wAnimal instanceof Dolphin) {
-								Dolphin dolphin = (Dolphin) wAnimal;
-
-								right.add("moistness: " + dolphin.getMoistnessLevel());
-							}
-
 
 						}
 					}
