@@ -4,9 +4,18 @@ Add greater entity information to the debug menu in Minecraft.
 
 Shows information specific to each entity that can help you with breeding, modding, or just knowing more about the game.
 
+Information can also be obtained by right clicking blocks with a `BlockEntity`. Such as `BeehiveBlock`s.
+
 ## Information
 
-- All entities
+- Blocks
+  - Beehive Blocks
+    - `bee count`
+    - `is full`
+    - `is empty`
+    - `is sedated`
+
+- Entities
   - `distance`
     - Living entities
       - `health`

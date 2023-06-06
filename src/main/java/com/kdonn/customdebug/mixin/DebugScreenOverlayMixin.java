@@ -3,17 +3,24 @@ package com.kdonn.customdebug.mixin;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
+import com.kdonn.customdebug.CustomdebugClient;
+import com.mojang.authlib.minecraft.client.MinecraftClient;
+import com.mojang.logging.LogUtils;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
@@ -45,41 +52,76 @@ import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.monster.Strider;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.item.DyeColor;
+import static net.minecraft.world.level.block.BeehiveBlock.HONEY_LEVEL;
 import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.gui.overlay.ForgeGui;
-
+import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraft.network.protocol.game.DebugPackets;
 @Mixin(DebugScreenOverlay.class)
 public class DebugScreenOverlayMixin extends GuiComponent {
+	// Directly reference a slf4j logger
+	private static final Logger LOGGER = LogUtils.getLogger();
+
+	/**
+	 * Add more information into the right-hand menu of the F3 debug screen
+	 * 
+	 * @param cir		The mixin object to return the strings we get
+	 * @param i			Runtime max memory
+	 * @param j			Runtime total memory
+	 * @param k			Runtime free memory
+	 * @param l			Runtime used memory
+	 * @param list		The list of strings to render
+	 * @param entity	The entity under the crosshair, null if none
+	 */
 	@Inject(remap = false, method = "getSystemInformation", at = @At(value = "RETURN", ordinal = 1), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
 	public void getCustomSystemInformation(CallbackInfoReturnable<List<String>> cir, long i, long j, long k, long l, List<String> list, Entity entity) {
 		Minecraft mc = Minecraft.getInstance();
-		
-		/**
-		DebugScreenOverlay currObj = (DebugScreenOverlay)(Object)this;
-		
-		
-		if (currObj.block.getType() == HitResult.Type.BLOCK) {
-			BlockPos blockPos = ((BlockHitResult)currObj.block).getBlockPos();
-			
-			BlockEntity blockEntity = mc.player.level.getBlockEntity(blockPos);
 
-            if (blockEntity instanceof BeehiveBlockEntity beehiveBlockEntity) {
-            	int pos = list.indexOf(ChatFormatting.UNDERLINE + "Targeted Block: " + blockPos.getX() + ", " + blockPos.getY() + ", " + blockPos.getZ());
-            	
-            	list.add(pos + 2, "bee count: " + beehiveBlockEntity.getOccupantCount());
-            	list.add(pos + 3, "is full: " + beehiveBlockEntity.isFull());
-            	list.add(pos + 4, "is empty: " + beehiveBlockEntity.isEmpty());
-            	list.add(pos + 5, "is fire nearby: " + beehiveBlockEntity.isFireNearby());
-            	list.add(pos + 6, "is sedated: + " + beehiveBlockEntity.isSedated());
-            }
+		HitResult hitResult = mc.hitResult;
+
+		LocalPlayer player = mc.player;
+
+		// DebugScreenOverlay currObj = (DebugScreenOverlay)(Object)this;
+
+		if (hitResult != null && hitResult.getType() != HitResult.Type.MISS) {
+			if (hitResult.getType() == HitResult.Type.BLOCK) {
+				BlockPos blockPos = ((BlockHitResult) hitResult).getBlockPos();
+
+				BlockState blockState = mc.level.getBlockState(blockPos);
+
+				BlockEntity blockEntity = player.level.getBlockEntity(blockPos);
+
+				if (blockState.hasBlockEntity()) {
+					if (blockEntity instanceof BeehiveBlockEntity beehiveBlockEntity) {
+
+						int pos = list.indexOf(ChatFormatting.UNDERLINE + "Targeted Block: " + blockPos.getX() + ", " + blockPos.getY() + ", " + blockPos.getZ());
+
+						boolean alreadyCappedPos = blockPos.getX() == CustomdebugClient.xPos &&
+								blockPos.getY() == CustomdebugClient.yPos &&
+								blockPos.getZ() == CustomdebugClient.zPos;
+
+						boolean hasBeeInfo = CustomdebugClient.capturedBeeCount != -1 && alreadyCappedPos;
+
+						String prompt = "<RIGHT CLICK TO GET>";
+
+						list.add(pos + 2, "bee count: " + (hasBeeInfo ? CustomdebugClient.capturedBeeCount : prompt));     	
+						list.add(pos + 3, "is full: " + (hasBeeInfo ? CustomdebugClient.capturedBeeCount == 3: prompt ));
+						list.add(pos + 4, "is empty: " + (hasBeeInfo ? CustomdebugClient.capturedBeeCount == 0 : prompt));
+						list.add(pos + 6, "is sedated: " + beehiveBlockEntity.isSedated());
+					}
+				}
+			}
 		}
-		*/
-		
+
+
+
 		if (entity != null) {
 			list.add("distance: " + (entity.distanceTo(mc.player)));
 
@@ -231,7 +273,7 @@ public class DebugScreenOverlayMixin extends GuiComponent {
 				}
 			}
 		}
-		
+
 		cir.setReturnValue(list);
 	}
 }
