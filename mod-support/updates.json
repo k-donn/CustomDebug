@@ -1,5 +1,14 @@
 {
 	"homepage": "https://github.com/k-donn/CustomDebug",
+	"1.19": {
+		"1.0": "Stable version"
+	},
+	"1.19.1": {
+		"1.0": "Stable version"
+	},
+	"1.19.2": {
+		"1.0": "Stable version"
+	},
 	"1.18": {
 		"0.9": "Initial version"
 	},
@@ -7,6 +16,8 @@
 		"0.9": "Initial version"
 	},
 	"promos": {
+		"1.19-latest": "1.0",
+		"1.19-recommended": "1.0",
 		"1.18-latest": "0.9",
 		"1.18-recommended": "0.9"
 	}
