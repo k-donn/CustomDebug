@@ -6,6 +6,14 @@ Shows information specific to each entity that can help you with breeding, moddi
 
 Information can also be obtained by right clicking blocks with a `BlockEntity`. Such as `BeehiveBlock`s.
 
+## Screenshots
+
+A Turtle's properties being shown on the right hand side.
+
+![A picture of the F3 menu displaying a turtle's age, breed/egg status, and other properties.](https://github.com/k-donn/CustomDebug/assets/58149779/c1343bee-390a-4489-b47d-01e946f3fa25.png "Turtle usage example")
+
+The mod used on a BeeNest.
+
 ![A picture of the F3 menu displaying a bee nest's number of present bees along with its sedation state.](https://github-production-user-asset-6210df.s3.amazonaws.com/58149779/253094454-2e38679d-562a-4554-b709-843d9c210843.png "BeeNest mod usage example")
 
 ## Information
